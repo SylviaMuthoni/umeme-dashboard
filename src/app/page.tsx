@@ -1,65 +1,434 @@
-import Image from "next/image";
+"use client"
+import React, { useState, useEffect } from 'react';
+import { Battery, Sun, Zap, Cloud, CloudRain } from 'lucide-react';
+import { LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 
-export default function Home() {
+export default function EnergyDashboard() {
+  const [solarPower, setSolarPower] = useState(4.8);
+  const [batteryLevel, setBatteryLevel] = useState(78);
+  const [panelTemp, setPanelTemp] = useState(42);
+  const [efficiency, setEfficiency] = useState(94.3);
+  
+  const [historicalData, setHistoricalData] = useState([
+    { time: '06:00', power: 1.2, efficiency: 78 },
+    { time: '08:00', power: 2.8, efficiency: 85 },
+    { time: '10:00', power: 4.2, efficiency: 92 },
+    { time: '12:00', power: 5.8, efficiency: 96 },
+    { time: '14:00', power: 5.4, efficiency: 95 },
+    { time: '16:00', power: 4.1, efficiency: 91 },
+    { time: '18:00', power: 2.3, efficiency: 82 },
+    { time: '20:00', power: 0.5, efficiency: 65 },
+  ]);
+
+  const monthlyData = [
+    { month: 'Jan', energy: 320 },
+    { month: 'Feb', energy: 380 },
+    { month: 'Mar', energy: 450 },
+    { month: 'Apr', energy: 520 },
+    { month: 'May', energy: 580 },
+    { month: 'Jun', energy: 620 },
+  ];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setSolarPower(prev => Math.max(0, Math.min(6, prev + (Math.random() - 0.5) * 0.3)));
+      setBatteryLevel(prev => Math.max(20, Math.min(100, prev + (Math.random() - 0.5) * 1.5)));
+      setPanelTemp(prev => Math.max(25, Math.min(55, prev + (Math.random() - 0.5) * 2)));
+      setEfficiency(prev => Math.max(85, Math.min(98, prev + (Math.random() - 0.5) * 0.5)));
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const weatherCondition = solarPower > 4.5 ? 'sunny' : solarPower > 2.5 ? 'partly-cloudy' : 'cloudy';
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div style={{ 
+      height: '100vh', 
+      background: 'linear-gradient(to bottom right, #000B3C, rgba(21, 35, 219, 0.2), #000B3C)',
+      padding: '24px',
+      overflow: 'hidden'
+    }}>
+      <div style={{ height: '100%', maxWidth: '1536px', margin: '0 auto', display: 'flex', flexDirection: 'column' }}>
+        {/* Header */}
+        <div style={{ marginBottom: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div>
+            <h1 style={{ 
+              fontSize: '36px', 
+              fontWeight: 'bold', 
+              background: 'linear-gradient(to right, #F8D200, #3C9AE9)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text'
+            }}>
+              UmemeSense Dashboard
+            </h1>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '8px' }}>
+              <div style={{ 
+                width: '8px', 
+                height: '8px', 
+                backgroundColor: '#8ACE47', 
+                borderRadius: '50%',
+                animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite'
+              }}></div>
+              <span style={{ color: '#8ACE47', fontSize: '14px', fontWeight: '600' }}>System Online - Generating Power</span>
+            </div>
+          </div>
+          <div style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '12px', 
+            backgroundColor: 'rgba(0, 11, 60, 0.8)',
+            backdropFilter: 'blur(12px)',
+            borderRadius: '12px',
+            padding: '8px 16px',
+            border: '1px solid #1523DB'
+          }}>
+            {weatherCondition === 'sunny' && <Sun style={{ color: '#F8D200' }} size={32} />}
+            {weatherCondition === 'partly-cloudy' && <Cloud style={{ color: '#3C9AE9' }} size={32} />}
+            {weatherCondition === 'cloudy' && <CloudRain style={{ color: '#3C9AE9' }} size={32} />}
+            <div>
+              <p style={{ fontSize: '12px', color: '#9ca3af' }}>Weather</p>
+              <p style={{ color: 'white', fontWeight: '600', textTransform: 'capitalize' }}>
+                {weatherCondition.replace('-', ' ')}
+              </p>
+            </div>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        {/* Main Grid */}
+        <div style={{ 
+          flex: 1, 
+          display: 'grid', 
+          gridTemplateColumns: 'repeat(12, 1fr)', 
+          gap: '16px',
+          minHeight: 0
+        }}>
+          {/* Left Column - Key Metrics */}
+          <div style={{ gridColumn: 'span 3', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            {/* Current Power Generation */}
+            <div style={{ 
+              background: 'linear-gradient(to bottom right, rgba(248, 210, 0, 0.2), rgba(60, 154, 233, 0.2))',
+              backdropFilter: 'blur(12px)',
+              borderRadius: '16px',
+              padding: '20px',
+              border: '1px solid rgba(248, 210, 0, 0.3)',
+              boxShadow: '0 20px 25px -5px rgba(248, 210, 0, 0.2)'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                <Zap style={{ color: '#F8D200' }} size={24} />
+                <p style={{ color: '#d1d5db', fontSize: '14px' }}>Current Output</p>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
+                <span style={{ fontSize: '48px', fontWeight: 'bold', color: 'white' }}>{solarPower.toFixed(1)}</span>
+                <span style={{ fontSize: '24px', color: '#d1d5db' }}>MW</span>
+              </div>
+              <p style={{ color: '#8ACE47', fontSize: '14px', marginTop: '8px' }}>↑ Peak performance</p>
+            </div>
+
+            {/* Panel Temperature */}
+            <div style={{ 
+              backgroundColor: 'rgba(0, 11, 60, 0.5)',
+              backdropFilter: 'blur(12px)',
+              borderRadius: '16px',
+              padding: '20px',
+              border: '1px solid #1523DB',
+              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.5)'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+                <div>
+                  <p style={{ color: '#9ca3af', fontSize: '14px' }}>Panel Temp</p>
+                  <p style={{ fontSize: '30px', fontWeight: 'bold', color: 'white' }}>{panelTemp.toFixed(0)}°C</p>
+                </div>
+                <div style={{ 
+                  width: '64px', 
+                  height: '64px', 
+                  borderRadius: '50%',
+                  background: 'linear-gradient(to bottom right, #F8D200, #3C9AE9)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.3)'
+                }}>
+                  <span style={{ fontSize: '24px' }}>🌡️</span>
+                </div>
+              </div>
+              <div style={{ 
+                height: '8px', 
+                backgroundColor: 'rgba(21, 35, 219, 0.3)', 
+                borderRadius: '9999px',
+                overflow: 'hidden'
+              }}>
+                <div style={{ 
+                  height: '100%',
+                  background: 'linear-gradient(to right, #F8D200, #3C9AE9)',
+                  width: `${(panelTemp / 55) * 100}%`,
+                  transition: 'width 1s'
+                }}></div>
+              </div>
+              <p style={{ fontSize: '12px', color: '#9ca3af', marginTop: '8px' }}>Optimal: 25-45°C</p>
+            </div>
+
+            {/* System Efficiency */}
+            <div style={{ 
+              backgroundColor: 'rgba(0, 11, 60, 0.5)',
+              backdropFilter: 'blur(12px)',
+              borderRadius: '16px',
+              padding: '20px',
+              border: '1px solid #1523DB',
+              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.5)'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+                <div>
+                  <p style={{ color: '#9ca3af', fontSize: '14px' }}>Efficiency</p>
+                  <p style={{ fontSize: '30px', fontWeight: 'bold', color: 'white' }}>{efficiency.toFixed(1)}%</p>
+                </div>
+                <div style={{ 
+                  width: '64px', 
+                  height: '64px', 
+                  borderRadius: '50%',
+                  background: 'linear-gradient(to bottom right, #8ACE47, #3C9AE9)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.3)'
+                }}>
+                  <span style={{ fontSize: '24px' }}>⚡</span>
+                </div>
+              </div>
+              <div style={{ 
+                height: '8px', 
+                backgroundColor: 'rgba(21, 35, 219, 0.3)', 
+                borderRadius: '9999px',
+                overflow: 'hidden'
+              }}>
+                <div style={{ 
+                  height: '100%',
+                  background: 'linear-gradient(to right, #8ACE47, #3C9AE9)',
+                  width: `${efficiency}%`,
+                  transition: 'width 1s'
+                }}></div>
+              </div>
+              <p style={{ fontSize: '12px', color: '#9ca3af', marginTop: '8px' }}>Industry avg: 85%</p>
+            </div>
+
+            {/* Solar Panels Info */}
+            <div style={{ 
+              flex: 1,
+              backgroundColor: 'rgba(0, 11, 60, 0.5)',
+              backdropFilter: 'blur(12px)',
+              borderRadius: '16px',
+              padding: '20px',
+              border: '1px solid #1523DB',
+              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.5)'
+            }}>
+              <h3 style={{ fontSize: '18px', fontWeight: '600', color: 'white', marginBottom: '12px' }}>Panel Array</h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ color: '#9ca3af', fontSize: '14px' }}>Total Panels</span>
+                  <span style={{ color: 'white', fontWeight: '600' }}>2,840</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ color: '#9ca3af', fontSize: '14px' }}>Active Panels</span>
+                  <span style={{ color: '#8ACE47', fontWeight: '600' }}>2,835</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ color: '#9ca3af', fontSize: '14px' }}>Capacity</span>
+                  <span style={{ color: 'white', fontWeight: '600' }}>6.0 MW</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ color: '#9ca3af', fontSize: '14px' }}>Array Size</span>
+                  <span style={{ color: 'white', fontWeight: '600' }}>3.2 hectares</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Middle Column - Charts */}
+          <div style={{ gridColumn: 'span 6', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            {/* Power Generation Over Time */}
+            <div style={{ 
+              flex: 1,
+              backgroundColor: 'rgba(0, 11, 60, 0.5)',
+              backdropFilter: 'blur(12px)',
+              borderRadius: '16px',
+              padding: '16px',
+              border: '1px solid #1523DB',
+              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.5)'
+            }}>
+              <h3 style={{ fontSize: '18px', fontWeight: '600', color: 'white', marginBottom: '12px' }}>Today's Power Generation</h3>
+              <ResponsiveContainer width="100%" height="90%">
+                <AreaChart data={historicalData}>
+                  <defs>
+                    <linearGradient id="colorPower" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#3C9AE9" stopOpacity={0.8}/>
+                      <stop offset="95%" stopColor="#1523DB" stopOpacity={0.1}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#1523DB" />
+                  <XAxis dataKey="time" stroke="#9ca3af" />
+                  <YAxis stroke="#9ca3af" label={{ value: 'MW', angle: -90, position: 'insideLeft', fill: '#9ca3af' }} />
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: '#000B3C', border: '1px solid #1523DB', borderRadius: '8px' }}
+                    labelStyle={{ color: '#e5e7eb' }}
+                  />
+                  <Area type="monotone" dataKey="power" stroke="#3C9AE9" strokeWidth={3} fillOpacity={1} fill="url(#colorPower)" />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+
+            {/* Monthly Energy Production */}
+            <div style={{ 
+              flex: 1,
+              backgroundColor: 'rgba(0, 11, 60, 0.5)',
+              backdropFilter: 'blur(12px)',
+              borderRadius: '16px',
+              padding: '16px',
+              border: '1px solid #1523DB',
+              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.5)'
+            }}>
+              <h3 style={{ fontSize: '18px', fontWeight: '600', color: 'white', marginBottom: '12px' }}>Monthly Energy Production (MWh)</h3>
+              <ResponsiveContainer width="100%" height="90%">
+                <BarChart data={monthlyData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#1523DB" />
+                  <XAxis dataKey="month" stroke="#9ca3af" />
+                  <YAxis stroke="#9ca3af" />
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: '#000B3C', border: '1px solid #1523DB', borderRadius: '8px' }}
+                    labelStyle={{ color: '#e5e7eb' }}
+                  />
+                  <Bar dataKey="energy" fill="#3C9AE9" radius={[8, 8, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          {/* Right Column - Battery & Stats */}
+          <div style={{ gridColumn: 'span 3', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            {/* Battery Status */}
+            <div style={{ 
+              backgroundColor: 'rgba(0, 11, 60, 0.5)',
+              backdropFilter: 'blur(12px)',
+              borderRadius: '16px',
+              padding: '16px',
+              border: '1px solid #1523DB',
+              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.5)'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+                <h3 style={{ fontSize: '18px', fontWeight: '600', color: 'white' }}>Battery Storage</h3>
+                <Battery style={{ color: '#8ACE47' }} size={24} />
+              </div>
+              <div style={{ 
+                position: 'relative',
+                height: '208px',
+                backgroundColor: 'rgba(21, 35, 219, 0.3)',
+                borderRadius: '12px',
+                overflow: 'hidden',
+                border: '2px solid #1523DB',
+                marginBottom: '12px'
+              }}>
+                <div style={{ 
+                  position: 'absolute',
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  background: 'linear-gradient(to top, #8ACE47, #3C9AE9, #3D56FF)',
+                  height: `${batteryLevel}%`,
+                  transition: 'height 1s'
+                }}>
+                  <div style={{ 
+                    position: 'absolute',
+                    inset: 0,
+                    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                    animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite'
+                  }}></div>
+                </div>
+                <div style={{ 
+                  position: 'absolute',
+                  inset: 0,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <span style={{ 
+                    fontSize: '36px',
+                    fontWeight: 'bold',
+                    color: 'white',
+                    textShadow: '0 4px 6px rgba(0, 0, 0, 0.5)'
+                  }}>
+                    {batteryLevel.toFixed(0)}%
+                  </span>
+                </div>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}>
+                  <span style={{ color: '#9ca3af' }}>Capacity</span>
+                  <span style={{ color: 'white', fontWeight: '600' }}>50 MWh</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}>
+                  <span style={{ color: '#9ca3af' }}>Stored</span>
+                  <span style={{ color: 'white', fontWeight: '600' }}>{(50 * batteryLevel / 100).toFixed(1)} MWh</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Today's Impact */}
+            <div style={{ 
+              flex: 1,
+              backgroundColor: 'rgba(0, 11, 60, 0.5)',
+              backdropFilter: 'blur(12px)',
+              borderRadius: '16px',
+              padding: '16px',
+              border: '1px solid #1523DB',
+              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.5)'
+            }}>
+              <h3 style={{ fontSize: '18px', fontWeight: '600', color: 'white', marginBottom: '12px' }}>Today's Impact</h3>
+              
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div style={{ padding: '12px', backgroundColor: 'rgba(21, 35, 219, 0.3)', borderRadius: '12px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                    <span style={{ fontSize: '18px' }}>☀️</span>
+                    <p style={{ color: '#9ca3af', fontSize: '12px' }}>Energy Generated</p>
+                  </div>
+                  <p style={{ fontSize: '24px', fontWeight: 'bold', color: 'white' }}>87.4 MWh</p>
+                </div>
+
+                <div style={{ padding: '12px', backgroundColor: 'rgba(21, 35, 219, 0.3)', borderRadius: '12px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                    <span style={{ fontSize: '18px' }}>☀️</span>
+                    <p style={{ color: '#9ca3af', fontSize: '12px' }}>Renewable Energy Credits Earned</p>
+                  </div>
+                  <p style={{ fontSize: '24px', fontWeight: 'bold', color: 'white' }}>34.4 RECs</p>
+                </div>
+
+                <div style={{ padding: '12px', backgroundColor: 'rgba(21, 35, 219, 0.3)', borderRadius: '12px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                    <span style={{ fontSize: '18px' }}>🌱</span>
+                    <p style={{ color: '#9ca3af', fontSize: '12px' }}>CO₂ Avoided</p>
+                  </div>
+                  <p style={{ fontSize: '24px', fontWeight: 'bold', color: 'white' }}>54.6 tons</p>
+                </div>
+
+                <div style={{ padding: '12px', backgroundColor: 'rgba(21, 35, 219, 0.3)', borderRadius: '12px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                    <span style={{ fontSize: '18px' }}>🏠</span>
+                    <p style={{ color: '#9ca3af', fontSize: '12px' }}>Homes Powered</p>
+                  </div>
+                  <p style={{ fontSize: '24px', fontWeight: 'bold', color: 'white' }}>14,568</p>
+                </div>
+
+                <div style={{ padding: '12px', backgroundColor: 'rgba(21, 35, 219, 0.3)', borderRadius: '12px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                    <span style={{ fontSize: '18px' }}>💰</span>
+                    <p style={{ color: '#9ca3af', fontSize: '12px' }}>Cost Savings</p>
+                  </div>
+                  <p style={{ fontSize: '24px', fontWeight: 'bold', color: 'white' }}>$8,740</p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-      </main>
+      </div>
     </div>
   );
 }
